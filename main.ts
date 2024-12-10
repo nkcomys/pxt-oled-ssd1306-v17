@@ -345,8 +345,8 @@ namespace OLED {
     //% y1.defl=20
     //% weight=0
     export function drawFillRectangle(x0: number, y0: number, x1: number, y1: number) {
-        for (let dy = y0; dy <= y1; dy++) {
-            drawLine(x0, dy, x1, dy)
+        for (let dx = x0; dx <= x1; dx++) {
+            drawLine(dx, y0, dx, y1)
         }
     }
 
