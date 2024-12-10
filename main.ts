@@ -337,6 +337,19 @@ namespace OLED {
         drawLine(x0, y0, x0, y1)
         drawLine(x1, y0, x1, y1)
     }
+
+    //% block="draw filled rectangle from:|x: $x0 y: $y0 to| x: $x1 y: $y1"
+    //% x0.defl=0
+    //% y0.defl=0
+    //% x1.defl=20
+    //% y1.defl=20
+    //% weight=0
+    export function drawFillRectangle(x0: number, y0: number, x1: number, y1: number) {
+        for (let dy = y0; dy <= y1; dy++) {
+            drawLine(x0, dy, x1, dy)
+        }
+    }
+
     //% block="draw circle at x: $x y: $y radius: $r"
     //% x.defl=64
     //% y.defl=32
