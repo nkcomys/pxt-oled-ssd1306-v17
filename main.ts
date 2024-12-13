@@ -5,6 +5,18 @@ declare interface Math {
 
 //% color=#27b0ba icon="\uf26c"
 namespace OLED {
+
+
+    /**
+     * Select direction for drawing lines
+     */
+    export enum LineDirectionSelection {
+        //% block="horizontal"
+        horizontal,
+        //% block="vertical"
+        vertical
+    }
+
     let font: Buffer;
 
 
@@ -42,6 +54,9 @@ namespace OLED {
     //let font: Array<Array<number>>
     let loadStarted: boolean;
     let loadPercent: number;
+
+    let screenBuf = pins.createBuffer(1025);
+
     function command(cmd: number) {
         let buf = pins.createBuffer(2)
         buf[0] = 0x00
@@ -282,6 +297,164 @@ namespace OLED {
                 }
             }
         }
+    }
+
+    // Set the starting on the display for writing text
+    function set_pos(col: number = 0, page: number = 0) {
+        command(0xb0 | page) // page number
+        command(0x00 | (col % 16)) // lower start column address
+        command(0x10 | (col >> 4)) // upper start column address    
+    }
+
+    /**
+     * Using (x, y) coordinates, turn on a selected pixel on the screen.
+     * @param x is the X axis value, eg: 0
+     * @param y is the Y axis value, eg: 0
+     */
+    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y"
+    //% group="Show"
+    //% weight=70 blockGap=8
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=63
+    //% inlineInputMode=inline
+    export function setPixel(x: number, y: number) {
+
+        //if (initialised == 0)
+        //    initDisplay()
+
+        if (x < 0)
+            x = 0
+        
+        if (x > 127)
+            x = 127
+
+        if (y < 0)
+            y = 0
+
+        if (y > 63)
+            y = 63
+
+        let page = y >> 3
+        let shift_page = y % 8                                  // Calculate the page to write to
+        let ind = x + page * 128 + 1                            // Calculate which register in the page to write to
+        let screenPixel = (screenBuf[ind] | (1 << shift_page))  // Set the screen data byte
+        screenBuf[ind] = screenPixel                            // Store data in screen buffer
+        set_pos(x, page)                                        // Set the position on the screen to write at 
+        let writeOneByteBuf = pins.createBuffer(2)
+        writeOneByteBuf[0] = 0x40                               // Load buffer with command
+        writeOneByteBuf[1] = screenPixel                        // Load buffer with byte
+        pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
+    }
+
+    /**
+     * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
+     * @param lineDirection is the selection of either horizontal line or vertical line
+     * @param x is start position on the X axis, eg: 0
+     * @param y is start position on the Y axis, eg: 0
+     * @param len is the length of line, length is the number of pixels, eg: 10
+     */
+    //% blockId="VIEW128x64_draw_line" block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
+    //% weight=72 blockGap=8
+    //% group="Draw"
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=63
+    //% len.min=-128, len.max=128
+    //% inlineInputMode=inline
+    export function drawLine2(lineDirection: LineDirectionSelection, len: number, x: number, y: number) {
+
+        if (x < 0)
+            x = 0
+
+        if (x > 127)
+            x = 127
+
+        if (y < 0)
+            y = 0
+
+        if (y > 63)
+            y = 63
+
+        if (lineDirection == LineDirectionSelection.horizontal) {
+
+            if (len > 128) //check line length is not greater than screen length
+                len = 128       //if so, set to screen length max
+
+            else if (len < 0) {  //check if the line is a negative number
+
+                if (len < -128)   //limit to maximum screen length as a negative number
+                    len = -128      //set max negative line limit horizontal
+
+                len = Math.abs(len) //take absolute of the number for the length
+                x = x - len         //move the X point to the start of the line as drawing left to riight
+
+                if (x < 0) {         //check if X is now a negative number
+
+                    len = len + x   //if so then length calulated to 0 point
+                    x = 0           //x is now 0
+                }
+            }
+
+            if ((x + len) > 128)     //check that the length of line from the X start point does not exceed the screen limits
+                len = 128 - x       //if so adjust length to the length from X to the end of screen
+            
+            for (let hPixel = x; hPixel < (x + len); hPixel++)      // Loop to set the pixels in the horizontal line
+                setPixel(hPixel, y)
+        } else if (lineDirection == LineDirectionSelection.vertical) {
+
+            if (len > 64)          // check for max vertical length
+                len = 64            //if so, set to screen height max
+            
+            else if (len < 0) {     //check if the line is a negative number
+
+                if (len < -64)    //limit to maximum screen length as a negative number
+                    len = -64       //set max negative line limit vertically
+                
+                len = Math.abs(len) //take absolute value of length and adjust the y value
+                y = y - len         //move the Y point to the start of the line as drawing left to riight
+                
+                if (y < 0) {    //check the y has not gone below 0
+
+                    len = len + y   //if so then length calulated to 0 point
+                    y = 0           //y is now 0
+                }
+            }
+
+            if ((y + len) > 64)   //check that the length of line from the Y start point does not exceed the screen limits
+                len = 64 - y        //if so adjust length to the length from X to the end of screen
+            
+            for (let vPixel = y; vPixel < (y + len); vPixel++)      // Loop to set the pixels in the vertical line
+                setPixel(x, vPixel)
+        }
+    }
+
+    /**
+     * Draw a rectangle with a specific width and height in pixels, using the (x, y) coordinates as a starting point.
+     * @param width is width of the rectangle, eg: 60
+     * @param height is height of the rectangle, eg: 30
+     * @param x is the start position on the X axis, eg: 0
+     * @param y is the start position on the Y axis, eg: 0
+     */
+    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle %width|wide %height|high from position x %x|y %y"
+    //% weight=71 blockGap=8
+    //% group="Draw"
+    //% inlineInputMode=inline
+    //% width.min=1 width.max=127
+    //% height.min=1 height.max=63
+    //% x.min=0 x.max=127
+    //% y.min=0 y.max=63
+    export function drawRect2(width: number, height: number, x: number, y: number) {
+
+        if (!x)    // If variable 'x' has not been used, default to x position of 0
+            x = 0
+
+        if (!y)    // If variable 'y' has not been used, default to y position of 0
+            y = 0
+
+        // Draw the lines for each side of the rectangle
+        drawLine2(LineDirectionSelection.horizontal, width, x, y)
+        drawLine2(LineDirectionSelection.horizontal, width + 1, x, y + height)
+        drawLine2(LineDirectionSelection.vertical, height, x, y)
+        drawLine2(LineDirectionSelection.vertical, height + 1, x + width, y)
     }
 
     //% block="draw line from:|x: $x0 y: $y0 to| x: $x1 y: $y1"
