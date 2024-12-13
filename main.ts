@@ -17,6 +17,16 @@ namespace OLED {
         vertical
     }
 
+    /**
+     * Select direction for drawing lines
+     */
+    export enum FillSelection {
+        //% block="not filled"
+        notFilled,
+        //% block="filled"
+        filled
+    }
+
     let font: Buffer;
 
 
@@ -252,52 +262,6 @@ namespace OLED {
         }
 
     }
-    function drawShape(pixels: Array<Array<number>>) {
-        let x1 = displayWidth
-        let y1 = displayHeight * 8
-        let x2 = 0
-        let y2 = 0
-        for (let i = 0; i < pixels.length; i++) {
-            if (pixels[i][0] < x1) {
-                x1 = pixels[i][0]
-            }
-            if (pixels[i][0] > x2) {
-                x2 = pixels[i][0]
-            }
-            if (pixels[i][1] < y1) {
-                y1 = pixels[i][1]
-            }
-            if (pixels[i][1] > y2) {
-                y2 = pixels[i][1]
-            }
-        }
-        let page1 = Math.floor(y1 / 8)
-        let page2 = Math.floor(y2 / 8)
-        let line = pins.createBuffer(2)
-        line[0] = 0x40
-        for (let x = x1; x <= x2; x++) {
-            for (let page = page1; page <= page2; page++) {
-                line[1] = 0x00
-                for (let i = 0; i < pixels.length; i++) {
-                    if (pixels[i][0] === x) {
-                        if (Math.floor(pixels[i][1] / 8) === page) {
-                            line[1] |= Math.pow(2, (pixels[i][1] % 8))
-                        }
-                    }
-                }
-                if (line[1] !== 0x00) {
-                    command(SSD1306_SETCOLUMNADRESS)
-                    command(x)
-                    command(x + 1)
-                    command(SSD1306_SETPAGEADRESS)
-                    command(page)
-                    command(page + 1)
-                    //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
-                    pins.i2cWriteBuffer(chipAdress, line, false)
-                }
-            }
-        }
-    }
 
     // Set the starting on the display for writing text
     function set_pos(col: number = 0, page: number = 0) {
@@ -429,12 +393,13 @@ namespace OLED {
 
     /**
      * Draw a rectangle with a specific width and height in pixels, using the (x, y) coordinates as a starting point.
+     * @param filled is the selection of either filled or not
      * @param width is width of the rectangle, eg: 60
      * @param height is height of the rectangle, eg: 30
      * @param x is the start position on the X axis, eg: 0
      * @param y is the start position on the Y axis, eg: 0
      */
-    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle %width|wide %height|high from position x %x|y %y"
+    //% blockId="VIEW128x64_draw_rect" block="draw a %filled rectangle %width|wide %height|high from position x %x|y %y"
     //% weight=71 blockGap=8
     //% group="Draw"
     //% inlineInputMode=inline
@@ -442,7 +407,7 @@ namespace OLED {
     //% height.min=1 height.max=63
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
-    export function drawRect2(width: number, height: number, x: number, y: number) {
+    export function drawRect2(filled: FillSelection, width: number, height: number, x: number, y: number) {
 
         if (!x)    // If variable 'x' has not been used, default to x position of 0
             x = 0
@@ -451,76 +416,17 @@ namespace OLED {
             y = 0
 
         // Draw the lines for each side of the rectangle
-        drawLine2(LineDirectionSelection.horizontal, width, x, y)
-        drawLine2(LineDirectionSelection.horizontal, width + 1, x, y + height)
-        drawLine2(LineDirectionSelection.vertical, height, x, y)
-        drawLine2(LineDirectionSelection.vertical, height + 1, x + width, y)
-    }
-
-    //% block="draw line from:|x: $x0 y: $y0 to| x: $x1 y: $y1"
-    //% x0.defl=0
-    //% y0.defl=0
-    //% x1.defl=20
-    //% y1.defl=20
-    //% weight=1
-    export function drawLine(x0: number, y0: number, x1: number, y1: number) {
-        let pixels: Array<Array<number>> = []
-        let kx: number, ky: number, c: number, i: number, xx: number, yy: number, dx: number, dy: number;
-        let targetX = x1
-        let targetY = y1
-        x1 -= x0; kx = 0; if (x1 > 0) kx = +1; if (x1 < 0) { kx = -1; x1 = -x1; } x1++;
-        y1 -= y0; ky = 0; if (y1 > 0) ky = +1; if (y1 < 0) { ky = -1; y1 = -y1; } y1++;
-        if (x1 >= y1) {
-            c = x1
-            for (i = 0; i < x1; i++ , x0 += kx) {
-                pixels.push([x0, y0])
-                c -= y1; if (c <= 0) { if (i != x1 - 1) pixels.push([x0 + kx, y0]); c += x1; y0 += ky; if (i != x1 - 1) pixels.push([x0, y0]); }
-                if (pixels.length > 20) {
-                    drawShape(pixels)
-                    pixels = []
-                    drawLine(x0, y0, targetX, targetY)
-                    return
-                }
+        if(filled){
+            for (let dy = y; dy <= y+height; dy++) {
+                drawLine2(LineDirectionSelection.horizontal, width, x, dy)
             }
-        } else {
-            c = y1
-            for (i = 0; i < y1; i++ , y0 += ky) {
-                pixels.push([x0, y0])
-                c -= x1; if (c <= 0) { if (i != y1 - 1) pixels.push([x0, y0 + ky]); c += y1; x0 += kx; if (i != y1 - 1) pixels.push([x0, y0]); }
-                if (pixels.length > 20) {
-                    drawShape(pixels)
-                    pixels = []
-                    drawLine(x0, y0, targetX, targetY)
-                    return
-                }
-            }
+        }else{
+            drawLine2(LineDirectionSelection.horizontal, width, x, y)
+            drawLine2(LineDirectionSelection.horizontal, width + 1, x, y + height)
+            drawLine2(LineDirectionSelection.vertical, height, x, y)
+            drawLine2(LineDirectionSelection.vertical, height + 1, x + width, y)
         }
-        drawShape(pixels)
-    }
-
-    //% block="draw rectangle from:|x: $x0 y: $y0 to| x: $x1 y: $y1"
-    //% x0.defl=0
-    //% y0.defl=0
-    //% x1.defl=20
-    //% y1.defl=20
-    //% weight=0
-    export function drawRectangle(x0: number, y0: number, x1: number, y1: number) {
-        drawLine(x0, y0, x1, y0)
-        drawLine(x0, y1, x1, y1)
-        drawLine(x0, y0, x0, y1)
-        drawLine(x1, y0, x1, y1)
-    }
-
-    //% block="draw filled rectangle from:|x: $x0 y: $y0 to| x: $x1 y: $y1"
-    //% x0.defl=0
-    //% y0.defl=0
-    //% x1.defl=20
-    //% y1.defl=20
-    //% weight=0
-    export function drawFillRectangle(x0: number, y0: number, x1: number, y1: number) {
-        for (let dx = x0; dx <= x1; dx++) {
-            drawLine(dx, y0, dx, y1)
-        }
+        
     }
 
     //% block="draw circle at x: $x y: $y radius: $r"
@@ -531,16 +437,14 @@ namespace OLED {
     export function drawCircle(x: number, y: number, r: number) {
         let theta = 0;
         let step = Math.PI / 90;  // Adjust step for smoothness
-        let pixels: Array<Array<number>> = [];
-    
+
         while (theta < 2 * Math.PI) {
             let xPos = Math.floor(x + r * Math.cos(theta));
             let yPos = Math.floor(y + r * Math.sin(theta));
-            pixels.push([xPos, yPos]);
+            setPixel(xPos, yPos)
             theta += step;
         }
-    
-        drawShape(pixels);
+
     }
     
     //% block="draw filled circle at x: $x y: $y radius: $r"
@@ -551,7 +455,8 @@ namespace OLED {
     export function drawFilledCircle(x: number, y: number, r: number) {
         for (let dx = -r; dx <= r; dx++) {
             let height = Math.floor(Math.sqrt(r * r - dx * dx));
-            drawLine(x + dx, y - height, x + dx, y + height);
+            drawLine2(LineDirectionSelection.vertical, height*2, x + dx, y-height)
+            //drawLine(x + dx, y - height, x + dx, y + height);
         }
     }
     //% block="initialize OLED with width $width height $height"
