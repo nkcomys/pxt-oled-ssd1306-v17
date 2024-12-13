@@ -262,12 +262,58 @@ namespace OLED {
         }
 
     }
+    function drawShape(pixels: Array<Array<number>>) {
+        let x1 = displayWidth
+        let y1 = displayHeight * 8
+        let x2 = 0
+        let y2 = 0
+        for (let i = 0; i < pixels.length; i++) {
+            if (pixels[i][0] < x1) {
+                x1 = pixels[i][0]
+            }
+            if (pixels[i][0] > x2) {
+                x2 = pixels[i][0]
+            }
+            if (pixels[i][1] < y1) {
+                y1 = pixels[i][1]
+            }
+            if (pixels[i][1] > y2) {
+                y2 = pixels[i][1]
+            }
+        }
+        let page1 = Math.floor(y1 / 8)
+        let page2 = Math.floor(y2 / 8)
+        let line = pins.createBuffer(2)
+        line[0] = 0x40
+        for (let x = x1; x <= x2; x++) {
+            for (let page = page1; page <= page2; page++) {
+                line[1] = 0x00
+                for (let i = 0; i < pixels.length; i++) {
+                    if (pixels[i][0] === x) {
+                        if (Math.floor(pixels[i][1] / 8) === page) {
+                            line[1] |= Math.pow(2, (pixels[i][1] % 8))
+                        }
+                    }
+                }
+                if (line[1] !== 0x00) {
+                    command(SSD1306_SETCOLUMNADRESS)
+                    command(x)
+                    command(x + 1)
+                    command(SSD1306_SETPAGEADRESS)
+                    command(page)
+                    command(page + 1)
+                    //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
+                    pins.i2cWriteBuffer(chipAdress, line, false)
+                }
+            }
+        }
+    }
 
     // Set the starting on the display for writing text
     function set_pos(col: number = 0, page: number = 0) {
         command(0xb0 | page) // page number
-        command(0x00 | (col % 16)) // lower start column address
-        command(0x10 | (col >> 4)) // upper start column address    
+        command(SSD1306_SETLOWCOLUMN | (col % 16)) // lower start column address
+        command(SSD1306_SETHIGHCOLUMN | (col >> 4)) // upper start column address    
     }
 
     /**
@@ -307,6 +353,49 @@ namespace OLED {
         let writeOneByteBuf = pins.createBuffer(2)
         writeOneByteBuf[0] = 0x40                               // Load buffer with command
         writeOneByteBuf[1] = screenPixel                        // Load buffer with byte
+        pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
+    }
+
+
+    /**
+     * Using (x, y) coordinates, turn on a selected pixel on the screen.
+     * @param x is the X axis value, eg: 0
+     * @param y is the Y axis value, eg: 0
+     * @param len is the len value, eg: 0
+     */
+    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y|len %len"
+    //% group="Show"
+    //% weight=70 blockGap=8
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=63
+    //% len.min=1, len.max=8
+    //% inlineInputMode=inline
+    export function setPixel2(x: number, y: number, len: number) {
+
+        //if (initialised == 0)
+        //    initDisplay()
+
+        if (x < 0)
+            x = 0
+        
+        if (x > 127)
+            x = 127
+
+        if (y < 0)
+            y = 0
+
+        if (y > 63)
+            y = 63
+
+        let page = y >> 3
+        let shift_page = y % 8                                  // Calculate the page to write to
+        let ind = x + page * 128 + 1                            // Calculate which register in the page to write to
+        let screenPixel = (screenBuf[ind] | (1 << shift_page))  // Set the screen data byte
+        screenBuf[ind] = screenPixel                            // Store data in screen buffer
+        set_pos(x, page)                                        // Set the position on the screen to write at 
+        let writeOneByteBuf = pins.createBuffer(2)
+        writeOneByteBuf[0] = 0x40                               // Load buffer with command
+        writeOneByteBuf[1] = len                        // Load buffer with byte
         pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
     }
 
