@@ -363,7 +363,7 @@ namespace OLED {
      * @param y is the Y axis value, eg: 0
      * @param len is the len value, eg: 0
      */
-    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y|len %len"
+    //% blockId="VIEW128x64_set_pixel2" block="show pixel2 at x %x|y %y|len %len"
     //% group="Show"
     //% weight=70 blockGap=8
     //% x.min=0, x.max=127
