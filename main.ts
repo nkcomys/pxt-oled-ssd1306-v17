@@ -368,7 +368,7 @@ namespace OLED {
     //% weight=70 blockGap=8
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
-    //% len.min=1, len.max=8
+    //% len.min=1, len.max=7
     //% inlineInputMode=inline
     export function setPixel2(x: number, y: number, len: number) {
 
@@ -395,7 +395,10 @@ namespace OLED {
         set_pos(x, page)                                        // Set the position on the screen to write at 
         let writeOneByteBuf = pins.createBuffer(2)
         writeOneByteBuf[0] = 0x40                               // Load buffer with command
-        writeOneByteBuf[1] = len                        // Load buffer with byte
+        writeOneByteBuf[1] = 0x00                               // Load buffer with byte
+        for (let p = 0; p <= len; p++) {
+            writeOneByteBuf[1] |= (1 << p)
+        }
         pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
     }
 
