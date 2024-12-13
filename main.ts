@@ -356,52 +356,6 @@ namespace OLED {
         pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
     }
 
-
-    /**
-     * Using (x, y) coordinates, turn on a selected pixel on the screen.
-     * @param x is the X axis value, eg: 0
-     * @param y is the Y axis value, eg: 0
-     * @param len is the len value, eg: 0
-     */
-    //% blockId="VIEW128x64_set_pixel2" block="show pixel2 at x %x|y %y|len %len"
-    //% group="Show"
-    //% weight=70 blockGap=8
-    //% x.min=0, x.max=127
-    //% y.min=0, y.max=63
-    //% len.min=1, len.max=7
-    //% inlineInputMode=inline
-    export function setPixel2(x: number, y: number, len: number) {
-
-        //if (initialised == 0)
-        //    initDisplay()
-
-        if (x < 0)
-            x = 0
-        
-        if (x > 127)
-            x = 127
-
-        if (y < 0)
-            y = 0
-
-        if (y > 63)
-            y = 63
-
-        let page = y >> 3
-        let shift_page = y % 8                                  // Calculate the page to write to
-        let ind = x + page * 128 + 1                            // Calculate which register in the page to write to
-        let screenPixel = (screenBuf[ind] | (1 << shift_page))  // Set the screen data byte
-        screenBuf[ind] = screenPixel                            // Store data in screen buffer
-        set_pos(x, page)                                        // Set the position on the screen to write at 
-        let writeOneByteBuf = pins.createBuffer(2)
-        writeOneByteBuf[0] = 0x40                               // Load buffer with command
-        writeOneByteBuf[1] = 0x00                               // Load buffer with byte
-        for (let p = 0; p <= len; p++) {
-            writeOneByteBuf[1] |= (1 << p)
-        }
-        pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
-    }
-
     /**
      * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
      * @param lineDirection is the selection of either horizontal line or vertical line
