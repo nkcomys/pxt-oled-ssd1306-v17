@@ -299,6 +299,47 @@ namespace OLED {
                 pins.i2cWriteBuffer(chipAdress, line, false)
         }
 
+        if(fontZoom!=1){
+            y+=8;
+            command(SSD1306_SETCOLUMNADRESS)
+            command(x)
+            if(fontZoom==1)
+                command(x + 5)
+            else
+                command(x + 5 + 6)
+            command(SSD1306_SETPAGEADRESS)
+            command(y)
+            command(y + 1)
+            let line = pins.createBuffer(2)
+            line[0] = 0x40
+            for (let i = 0; i < 6; i++) {
+                if (i === 5) {
+                    line[1] = 0x00
+                } else {
+                    let charIndex = c.charCodeAt(0)
+                    let charNumber = font.getNumber(NumberFormat.UInt8BE, 5 * charIndex + i)
+
+                    if(fontZoom!=1){
+                        let result = 0;
+                        for (let i = 0; i <=7 ; i++) { // 从高位到低位
+                            const bit = (charNumber >> i) & 1; // 右移并与 1 进行按位与运算
+        
+                            result = (result << 2) | (bit << 1) | bit;
+                        }
+                        charNumber = result & 0xFFF;
+                    }
+
+
+                    line[1] = charNumber
+
+                }
+                pins.i2cWriteBuffer(chipAdress, line, false)
+
+                if(fontZoom!=1)
+                    pins.i2cWriteBuffer(chipAdress, line, false)
+            }
+        }
+
     }
     function drawShape(pixels: Array<Array<number>>) {
         let x1 = displayWidth
