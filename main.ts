@@ -288,7 +288,7 @@ namespace OLED {
     
                         result = (result << 2) | (bit << 1) | bit;
                     }
-                    charNumber = result >> 8;
+                    charNumber = result & 0xFFF;
                 }
 
 
@@ -328,7 +328,7 @@ namespace OLED {
         
                             result = (result << 2) | (bit << 1) | bit;
                         }
-                        charNumber = result & 0xFFF;
+                        charNumber = result >> 8;
                     }
 
 
