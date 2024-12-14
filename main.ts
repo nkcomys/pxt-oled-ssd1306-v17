@@ -373,14 +373,24 @@ namespace OLED {
                     if (pixels[i][0] === x) {
                         let y = pixels[i][1];
                         if ( (y >> 3) === page) {
-                            line[1] |= Math.pow(2, (pixels[i][1] % 8))
+
+                            let ind = x + page * 128 + 1
+                            let shift_page = y % 8
+                            let screenPixel = (screenBuf[ind] | (1 << shift_page))
+                            screenBuf[ind] = screenPixel
+
+                            line[1] |= Math.pow(2, shift_page)
                         }
                     }
                 }
+
+                
                 if (line[1] !== 0x00) {
                     set_pos(x, page)
+
+                    let buf2 = screenBuf.slice(x + page * 128 + 1, x + page * 128 + 1 + 7)
                     //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
-                    pins.i2cWriteBuffer(chipAdress, line)
+                    pins.i2cWriteBuffer(chipAdress, buf2)
                 }
             }
         }
