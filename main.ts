@@ -384,13 +384,16 @@ namespace OLED {
                     }
                 }
 
+                let ind = x + page * 128 + 1
                 
-                if (line[1] !== 0x00) {
-                    set_pos(x, page)
 
-                    let buf2 = screenBuf.slice(x + page * 128 + 1, x + page * 128 + 1 + 7)
+                if (screenBuf[ind] !== 0x00) {
+                    set_pos(x, page)
+                    line[1]  = screenBuf[ind]
+                    
+                   
                     //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
-                    pins.i2cWriteBuffer(chipAdress, buf2)
+                    pins.i2cWriteBuffer(chipAdress, line)
                 }
             }
         }
