@@ -190,7 +190,10 @@ namespace OLED {
                 charX = 0;
             }
             drawChar(charX, charY, str.charAt(i))
-            charX += 6
+            if(fontZoom==1)
+                charX += 6
+            else
+                charX += 12
         }
     }
     //% block="show string $str at $line"
@@ -204,7 +207,10 @@ namespace OLED {
                 newLine()
             }
             drawChar(charX, charY, str.charAt(i))
-            charX += 6
+            if(fontZoom==1)
+                charX += 6
+            else
+                charX += 12
         }
     }
     //% block="show number $n at $line"
@@ -223,7 +229,10 @@ namespace OLED {
                 newLine()
             }
             drawChar(charX, charY, str.charAt(i))
-            charX += 6
+            if(fontZoom==1)
+                charX += 6
+            else
+                charX += 12
         }
     }
     //% block="show (without newline) number $n"
