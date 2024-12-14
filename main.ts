@@ -291,6 +291,8 @@ namespace OLED {
                     charNumber = result & 0xFFF;
                 }
 
+                let ind = x + y * 128 + 1
+                screenBuf[ind] = charNumber
 
                 line[1] = charNumber
 
@@ -331,6 +333,8 @@ namespace OLED {
                         charNumber = result >> 8;
                     }
 
+                    let ind = x + y * 128 + 1
+                    screenBuf[ind] = charNumber
 
                     line[1] = charNumber
 
@@ -549,7 +553,7 @@ namespace OLED {
      * @param x is the start position on the X axis, eg: 0
      * @param y is the start position on the Y axis, eg: 0
      */
-    //% blockId="VIEW128x64_draw_rect" block="draw a %filled rectangle %width|wide %height|high from position x %x|y %y"
+    //% blockId="VIEW128x64_draw_rect" block="draw a %filled rectangle %width|width %height|height from position x %x|y %y"
     //% weight=71 blockGap=8
     //% group="Draw"
     //% inlineInputMode=inline
