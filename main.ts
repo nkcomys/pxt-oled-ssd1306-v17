@@ -283,7 +283,7 @@ namespace OLED {
 
                 if(fontZoom!=1){
                     let result = 0;
-                    for (let i = 0; i <=7 ; i++) { // 从高位到低位
+                    for (let i = 7; i >=0 ; i--) { // 从高位到低位
                         const bit = (charNumber >> i) & 1; // 右移并与 1 进行按位与运算
     
                         result = (result << 2) | (bit << 1) | bit;
@@ -323,7 +323,7 @@ namespace OLED {
 
                     if(fontZoom!=1){
                         let result = 0;
-                        for (let i = 0; i <=7 ; i++) { // 从高位到低位
+                        for (let i = 7; i >=0 ; i--) { // 从高位到低位
                             const bit = (charNumber >> i) & 1; // 右移并与 1 进行按位与运算
         
                             result = (result << 2) | (bit << 1) | bit;
