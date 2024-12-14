@@ -278,6 +278,18 @@ namespace OLED {
             } else {
                 let charIndex = c.charCodeAt(0)
                 let charNumber = font.getNumber(NumberFormat.UInt8BE, 5 * charIndex + i)
+
+                if(fontZoom!=1){
+                    let result = 0;
+                    for (let i = 0; i <=7 ; i++) { // 从高位到低位
+                        const bit = (charNumber >> i) & 1; // 右移并与 1 进行按位与运算
+    
+                        result = (result << 2) | (bit << 1) | bit;
+                    }
+                    charNumber = result >> 8;
+                }
+
+
                 line[1] = charNumber
 
             }
