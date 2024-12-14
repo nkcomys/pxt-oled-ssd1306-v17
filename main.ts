@@ -552,10 +552,13 @@ namespace OLED {
                 drawLine2(LineDirectionSelection.horizontal, width, x, dy)
             }
         }else{
-            drawLine2(LineDirectionSelection.horizontal, width, x, y)
-            drawLine2(LineDirectionSelection.horizontal, width + 1, x, y + height)
-            drawLine2(LineDirectionSelection.vertical, height, x, y)
-            drawLine2(LineDirectionSelection.vertical, height + 1, x + width, y)
+            let pixels: Array<Array<number>> = []
+            for(let dx = x; dx<=x+width; dx++){
+                for(let dy = y; dy<=y+height; dy++){
+                    pixels.push([dx,dy]);
+                }
+            }
+            drawShape(pixels)
         }
         
     }
