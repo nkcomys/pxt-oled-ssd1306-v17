@@ -65,6 +65,8 @@ namespace OLED {
     let loadStarted: boolean;
     let loadPercent: number;
 
+    let fontZoom: number = 1;
+
     let screenBuf = pins.createBuffer(1025);
 
     function command(cmd: number) {
@@ -73,6 +75,14 @@ namespace OLED {
         buf[1] = cmd
         pins.i2cWriteBuffer(chipAdress, buf, false)
     }
+
+    //% block="set Font $zoom zoom"
+    //% zoom.min=1 zoom.max=2
+    //% weight=2
+    export function setFontZomm(zoom: number) {
+        fontZoom = zoom
+    }
+
     //% block="clear OLED display"
     //% weight=3
     export function clear() {
@@ -241,9 +251,13 @@ namespace OLED {
         charX = xOffset
     }
     function drawChar(x: number, y: number, c: string) {
+
         command(SSD1306_SETCOLUMNADRESS)
         command(x)
-        command(x + 5)
+        if(fontZoom==1)
+            command(x + 5)
+        else
+            command(x + 5 + 6)
         command(SSD1306_SETPAGEADRESS)
         command(y)
         command(y + 1)
@@ -259,6 +273,9 @@ namespace OLED {
 
             }
             pins.i2cWriteBuffer(chipAdress, line, false)
+
+            if(fontZoom!=1)
+                pins.i2cWriteBuffer(chipAdress, line, false)
         }
 
     }
