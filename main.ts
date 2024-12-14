@@ -378,14 +378,9 @@ namespace OLED {
                     }
                 }
                 if (line[1] !== 0x00) {
-                    command(SSD1306_SETCOLUMNADRESS)
-                    command(x)
-                    command(x + 1)
-                    command(SSD1306_SETPAGEADRESS)
-                    command(page)
-                    command(page + 1)
+                    set_pos(x, page)
                     //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
-                    pins.i2cWriteBuffer(chipAdress, line, false)
+                    pins.i2cWriteBuffer(chipAdress, line)
                 }
             }
         }
