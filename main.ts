@@ -362,8 +362,8 @@ namespace OLED {
                 y2 = pixels[i][1]
             }
         }
-        let page1 = Math.floor(y1 / 8)
-        let page2 = Math.floor(y2 / 8)
+        let page1 =  y1 >> 3
+        let page2 =  y2 >> 3
         let line = pins.createBuffer(2)
         line[0] = 0x40
         for (let x = x1; x <= x2; x++) {
@@ -371,7 +371,8 @@ namespace OLED {
                 line[1] = 0x00
                 for (let i = 0; i < pixels.length; i++) {
                     if (pixels[i][0] === x) {
-                        if (Math.floor(pixels[i][1] / 8) === page) {
+                        let y = pixels[i][1];
+                        if ( (y >> 3) === page) {
                             line[1] |= Math.pow(2, (pixels[i][1] % 8))
                         }
                     }
@@ -453,6 +454,8 @@ namespace OLED {
     //% inlineInputMode=inline
     export function drawLine2(lineDirection: LineDirectionSelection, len: number, x: number, y: number) {
 
+        let pixels: Array<Array<number>> = []
+
         if (x < 0)
             x = 0
 
@@ -488,8 +491,10 @@ namespace OLED {
             if ((x + len) > 128)     //check that the length of line from the X start point does not exceed the screen limits
                 len = 128 - x       //if so adjust length to the length from X to the end of screen
             
-            for (let hPixel = x; hPixel < (x + len); hPixel++)      // Loop to set the pixels in the horizontal line
-                setPixel(hPixel, y)
+            for (let hPixel = x; hPixel < (x + len); hPixel++){      // Loop to set the pixels in the horizontal line
+                //setPixel(hPixel, y)
+                pixels.push([hPixel, y]);
+            }
         } else if (lineDirection == LineDirectionSelection.vertical) {
 
             if (len > 64)          // check for max vertical length
@@ -513,9 +518,13 @@ namespace OLED {
             if ((y + len) > 64)   //check that the length of line from the Y start point does not exceed the screen limits
                 len = 64 - y        //if so adjust length to the length from X to the end of screen
             
-            for (let vPixel = y; vPixel < (y + len); vPixel++)      // Loop to set the pixels in the vertical line
-                setPixel(x, vPixel)
+            for (let vPixel = y; vPixel < (y + len); vPixel++){      // Loop to set the pixels in the vertical line
+                //setPixel(x, vPixel)
+                pixels.push([x, vPixel]);
+            }
         }
+
+        drawShape(pixels)
     }
 
     /**
@@ -562,16 +571,19 @@ namespace OLED {
     //% r.defl=10
     //% weight=0
     export function drawCircle(x: number, y: number, r: number) {
+        let pixels: Array<Array<number>> = []
+
         let theta = 0;
         let step = Math.PI / 90;  // Adjust step for smoothness
 
         while (theta < 2 * Math.PI) {
             let xPos = Math.floor(x + r * Math.cos(theta));
             let yPos = Math.floor(y + r * Math.sin(theta));
-            setPixel(xPos, yPos)
+            //setPixel(xPos, yPos)
+            pixels.push([xPos, yPos]);
             theta += step;
         }
-
+        drawShape(pixels)
     }
     
     //% block="draw filled circle at x: $x y: $y radius: $r"
