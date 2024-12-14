@@ -388,7 +388,13 @@ namespace OLED {
                 
 
                 if (screenBuf[ind] !== 0x00) {
-                    set_pos(x, page)
+                    command(SSD1306_SETCOLUMNADRESS)
+                    command(x)
+                    command(x + 1)
+                    command(SSD1306_SETPAGEADRESS)
+                    command(page)
+                    command(page + 1)
+                    
                     line[1]  = screenBuf[ind]
                     
                    
