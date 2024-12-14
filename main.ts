@@ -257,6 +257,8 @@ namespace OLED {
     //% weight=4
     export function newLine() {
         charY++
+        if(fontZoom!=1)
+            charY++
         charX = xOffset
     }
     function drawChar(x: number, y: number, c: string) {
@@ -300,7 +302,7 @@ namespace OLED {
         }
 
         if(fontZoom!=1){
-            y+=8;
+            y++;
             command(SSD1306_SETCOLUMNADRESS)
             command(x)
             if(fontZoom==1)
