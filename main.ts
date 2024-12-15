@@ -577,7 +577,7 @@ namespace OLED {
             y = 0
 
         // Draw the lines for each side of the rectangle
-        if(filled){
+        if(filled==FillSelection.filled){
             let pixels: Array<Array<number>> = []
             for(let dx = x; dx<=x+width; dx++){
                 for(let dy = y; dy<=y+height; dy++){
