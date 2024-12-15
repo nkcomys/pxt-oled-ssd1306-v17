@@ -578,10 +578,6 @@ namespace OLED {
 
         // Draw the lines for each side of the rectangle
         if(filled){
-            for (let dy = y; dy <= y+height; dy++) {
-                drawLine2(LineDirectionSelection.horizontal, width, x, dy)
-            }
-        }else{
             let pixels: Array<Array<number>> = []
             for(let dx = x; dx<=x+width; dx++){
                 for(let dy = y; dy<=y+height; dy++){
@@ -589,6 +585,12 @@ namespace OLED {
                 }
             }
             drawShape(pixels)
+        }else{
+            drawLine2(LineDirectionSelection.horizontal, width, x, y)
+            drawLine2(LineDirectionSelection.horizontal, width + 1, x, y + height)
+            drawLine2(LineDirectionSelection.vertical, height, x, y)
+            drawLine2(LineDirectionSelection.vertical, height + 1, x + width, y)
+           
         }
         
     }

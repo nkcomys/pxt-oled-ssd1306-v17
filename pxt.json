@@ -1,6 +1,6 @@
 {
-    "name": "SSD1306_OLED_NK23",
-    "version": "2.2.23",
+    "name": "SSD1306_OLED_NK",
+    "version": "2.2.24",
     "description": "SSD1306 OLED controller",
     "license": "MIT",
     "dependencies": {
