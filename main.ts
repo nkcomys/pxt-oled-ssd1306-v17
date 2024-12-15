@@ -78,6 +78,7 @@ namespace OLED {
 
     //% block="set Font $zoom zoom"
     //% zoom.min=1 zoom.max=2
+    //% zoom.defl=1
     //% weight=2
     export function setFontZomm(zoom: number) {
         fontZoom = zoom
