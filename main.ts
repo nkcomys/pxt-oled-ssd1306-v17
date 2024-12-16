@@ -84,6 +84,19 @@ namespace OLED {
         fontZoom = zoom
     }
 
+
+    //% blockId="VIEW128x64_print_buffer" block="print Buffer"
+    //% weight=80
+    export function getPrintBuff():string {
+ 
+        let r = "";
+        for (let index = 0; index < screenBuf.length; index++) {
+            const element = screenBuf[index];
+            r = r + "" + element.toString(2)
+        }
+        return r;
+    }
+
     //% block="clear OLED display"
     //% weight=3
     export function clear() {
@@ -379,10 +392,10 @@ namespace OLED {
 
             command(SSD1306_SETCOLUMNADRESS)
             command(x1)
-            command(x2 + 1)
+            command(x2)
             command(SSD1306_SETPAGEADRESS)
             command(page)
-            command(page + 1)
+            command(page+1)
 
             line[1] = 0x00
 
@@ -564,8 +577,8 @@ namespace OLED {
     //% weight=71 blockGap=8
     //% group="Draw"
     //% inlineInputMode=inline
-    //% width.min=1 width.max=127
-    //% height.min=1 height.max=63
+    //% width.min=1 width.max=128
+    //% height.min=1 height.max=64
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
     export function drawRect2(filled: FillSelection, width: number, height: number, x: number, y: number) {
@@ -579,17 +592,17 @@ namespace OLED {
         // Draw the lines for each side of the rectangle
         if(filled==FillSelection.filled){
             let pixels: Array<Array<number>> = []
-            for(let dx = x; dx<=x+width; dx++){
-                for(let dy = y; dy<=y+height; dy++){
+            for(let dx = x; dx<=x+width-1; dx++){
+                for(let dy = y; dy<=y+height-1; dy++){
                     pixels.push([dx,dy]);
                 }
             }
             drawShape(pixels)
         }else{
             drawLine2(LineDirectionSelection.horizontal, width, x, y)
-            drawLine2(LineDirectionSelection.horizontal, width + 1, x, y + height)
+            drawLine2(LineDirectionSelection.horizontal, width, x, y + height-1)
             drawLine2(LineDirectionSelection.vertical, height, x, y)
-            drawLine2(LineDirectionSelection.vertical, height + 1, x + width, y)
+            drawLine2(LineDirectionSelection.vertical, height, x + width-1, y)
            
         }
         
