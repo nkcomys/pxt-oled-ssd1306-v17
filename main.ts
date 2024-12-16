@@ -94,6 +94,9 @@ namespace OLED {
         if(bufferSize>16){
             bufferSize=16
         }
+        if(c<16){
+            bufferSize=1
+        }
         
         let line = pins.createBuffer(bufferSize+1)
         line[0] = 0x40
