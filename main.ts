@@ -386,9 +386,6 @@ namespace OLED {
         let page2 =  y2 >> 3
         let line = pins.createBuffer(2)
         line[0] = 0x40
-
-        
-
     
         for (let page = page1; page <= page2; page++) {
 
@@ -597,6 +594,10 @@ namespace OLED {
             for(let dx = x; dx<=x+width-1; dx++){
                 for(let dy = y; dy<=y+height-1; dy++){
                     pixels.push([dx,dy]);
+                    if(pixels.length>128){
+                        drawShape(pixels)
+                        pixels = [];
+                    }
                 }
             }
             drawShape(pixels)
