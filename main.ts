@@ -554,6 +554,7 @@ namespace OLED {
     //% r.defl=10
     //% weight=0
     //% group="Draw"
+    //% inlineInputMode=inline
     export function drawCircle(filled: FillSelection, x: number, y: number, r: number) {
         if(filled==FillSelection.filled){
             for (let dx = -r; dx <= r; dx++) {
