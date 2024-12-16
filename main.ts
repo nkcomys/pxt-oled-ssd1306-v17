@@ -382,7 +382,8 @@ namespace OLED {
             command(page)
             command(page)
 
-            line[1] = 0x00
+            let i = 1;
+            let haveOther = false
 
             for (let x = x1; x <= x2; x++) {
 
@@ -402,12 +403,18 @@ namespace OLED {
                     }
                 }
 
-                line[1]  = screenBuf[ind]
-                
-                
-                //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
-                pins.i2cWriteBuffer(chipAdress, line)
+                line[i]  = screenBuf[ind]
+                haveOther = true
+                i++;
+                if(i==17){
+                    pins.i2cWriteBuffer(chipAdress, line)
+                    i=1
+                    haveOther = false
+                }
 
+            }
+            if(haveOther){
+                pins.i2cWriteBuffer(chipAdress, line)
             }
 
         }
