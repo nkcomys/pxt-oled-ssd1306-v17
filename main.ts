@@ -78,12 +78,14 @@ namespace OLED {
     //% zoom.min=1 zoom.max=2
     //% zoom.defl=1
     //% weight=2
+    //% group="Text"
     export function setFontZomm(zoom: number) {
         fontZoom = zoom
     }
 
     //% blockId="VIEW128x64_show_buffer" block="show Buffer"
     //% weight=80
+    //% group="Draw"
     export function getShowBuff() {
  
         let x1 = 0;
@@ -124,6 +126,7 @@ namespace OLED {
 
     //% block="clear OLED display"
     //% weight=3
+    //% group="Draw"
     export function clear() {
         command(SSD1306_SETCOLUMNADRESS)
         command(0x00)
@@ -148,6 +151,7 @@ namespace OLED {
     //% block="clear line $line"
     //% line.min=0 line.max=7
     //% weight=6
+    //% group="Text"
     export function clearLine(line: number) {
         charX = 0;
         charY = line;
@@ -166,6 +170,7 @@ namespace OLED {
     //% block="show string $str at $line"
     //% line.min=0 line.max=7
     //% weight=6
+    //% group="Text"
     export function writeStringAtLine(str: string, line: number) {
         charX = 0;
         charY = line;
@@ -183,6 +188,7 @@ namespace OLED {
     //% block="show number $n at $line"
     //% line.min=0 line.max=7
     //% weight=5
+    //% group="Text"
     export function writeNumAtLine(n: number, line: number) {
         let numString = n.toString()
         writeStringAtLine(numString, line)
@@ -190,6 +196,7 @@ namespace OLED {
 
     //% block="show (without newline) string $str"
     //% weight=6
+    //% group="Text"
     export function writeString(str: string) {
         for (let i = 0; i < str.length; i++) {
             if (charX > displayWidth - 6) {
@@ -204,24 +211,28 @@ namespace OLED {
     }
     //% block="show (without newline) number $n"
     //% weight=5
+    //% group="Text"
     export function writeNum(n: number) {
         let numString = n.toString()
         writeString(numString)
     }
     //% block="show string $str"
     //% weight=8
+    //% group="Text"
     export function writeStringNewLine(str: string) {
         writeString(str)
         newLine()
     }
     //% block="show number $n"
     //% weight=7
+    //% group="Text"
     export function writeNumNewLine(n: number) {
         writeNum(n)
         newLine()
     }
     //% block="insert newline"
     //% weight=4
+    //% group="Text"
     export function newLine() {
         charY++
         if(fontZoom!=1)
