@@ -86,15 +86,13 @@ namespace OLED {
     //% blockId="VIEW128x64_show_buffer" block="show Buffer"
     //% weight=80
     //% group="Draw"
-    export function getShowBuff() {
- 
-        let x1 = 0;
-        let x2 = 127;
+    export function drawBuff(x1: number=0, x2: number=127, page1: number=0, page2: number=7) {
+
 
         let line = pins.createBuffer(17)
         line[0] = 0x40
 
-        for (let page = 0; page <= 7; page++) {
+        for (let page = page1; page <= page2; page++) {
 
             command(SSD1306_SETCOLUMNADRESS)
             command(x1)
@@ -415,7 +413,7 @@ namespace OLED {
 
         }
 
-        getShowBuff()
+        drawBuff(x1,x2,page1,page2)
 
     }
 
