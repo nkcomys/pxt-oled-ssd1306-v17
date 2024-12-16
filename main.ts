@@ -329,7 +329,7 @@ namespace OLED {
                 command(x + 5 + 6)
             command(SSD1306_SETPAGEADRESS)
             command(y)
-            command(y + 1)
+            command(y)
             let line = pins.createBuffer(2)
             line[0] = 0x40
             for (let i = 0; i < 6; i++) {
@@ -395,7 +395,7 @@ namespace OLED {
             command(x2)
             command(SSD1306_SETPAGEADRESS)
             command(page)
-            command(page+1)
+            command(page)
 
             line[1] = 0x00
 
