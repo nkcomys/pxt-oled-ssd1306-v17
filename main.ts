@@ -89,7 +89,7 @@ namespace OLED {
         let x1 = 0;
         let x2 = 127;
 
-        let line = pins.createBuffer(2)
+        let line = pins.createBuffer(17)
         line[0] = 0x40
 
         for (let page = 0; page <= 7; page++) {
@@ -102,14 +102,21 @@ namespace OLED {
             command(page)
 
 
+            let i = 1;
             for (let x = x1; x <= x2; x++) {
 
                 let ind = x + page * 128 + 1
-                line[1]  = screenBuf[ind]
+                line[i]  = screenBuf[ind]
                 
-                //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
-                pins.i2cWriteBuffer(chipAdress, line)
+                i++;
+                if(i==16){
+                    pins.i2cWriteBuffer(chipAdress, line)
+                    i=1
+                }
 
+            }
+            if(i<16){
+                pins.i2cWriteBuffer(chipAdress, line)
             }
 
         }
@@ -393,53 +400,6 @@ namespace OLED {
 
     }
 
-    // Set the starting on the display for writing text
-    function set_pos(col: number = 0, page: number = 0) {
-        command(0xb0 | page) // page number
-        command(SSD1306_SETLOWCOLUMN | (col % 16)) // lower start column address
-        command(SSD1306_SETHIGHCOLUMN | (col >> 4)) // upper start column address    
-    }
-
-    /**
-     * Using (x, y) coordinates, turn on a selected pixel on the screen.
-     * @param x is the X axis value, eg: 0
-     * @param y is the Y axis value, eg: 0
-     */
-    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y"
-    //% group="Show"
-    //% weight=70 blockGap=8
-    //% x.min=0, x.max=127
-    //% y.min=0, y.max=63
-    //% inlineInputMode=inline
-    export function setPixel(x: number, y: number) {
-
-        //if (initialised == 0)
-        //    initDisplay()
-
-        if (x < 0)
-            x = 0
-        
-        if (x > 127)
-            x = 127
-
-        if (y < 0)
-            y = 0
-
-        if (y > 63)
-            y = 63
-
-        let page = y >> 3
-        let shift_page = y % 8                                  // Calculate the page to write to
-        let ind = x + page * 128 + 1                            // Calculate which register in the page to write to
-        let screenPixel = (screenBuf[ind] | (1 << shift_page))  // Set the screen data byte
-        screenBuf[ind] = screenPixel                            // Store data in screen buffer
-        set_pos(x, page)                                        // Set the position on the screen to write at 
-        let writeOneByteBuf = pins.createBuffer(2)
-        writeOneByteBuf[0] = 0x40                               // Load buffer with command
-        writeOneByteBuf[1] = screenPixel                        // Load buffer with byte
-        pins.i2cWriteBuffer(chipAdress, writeOneByteBuf)    // Send data to screen
-    }
-
     /**
      * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
      * @param lineDirection is the selection of either horizontal line or vertical line
@@ -454,7 +414,7 @@ namespace OLED {
     //% y.min=0, y.max=63
     //% len.min=-128, len.max=128
     //% inlineInputMode=inline
-    export function drawLine2(lineDirection: LineDirectionSelection, len: number, x: number, y: number) {
+    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number) {
 
         let pixels: Array<Array<number>> = []
 
@@ -494,7 +454,6 @@ namespace OLED {
                 len = 128 - x       //if so adjust length to the length from X to the end of screen
             
             for (let hPixel = x; hPixel < (x + len); hPixel++){      // Loop to set the pixels in the horizontal line
-                //setPixel(hPixel, y)
                 pixels.push([hPixel, y]);
             }
         } else if (lineDirection == LineDirectionSelection.vertical) {
@@ -521,7 +480,6 @@ namespace OLED {
                 len = 64 - y        //if so adjust length to the length from X to the end of screen
             
             for (let vPixel = y; vPixel < (y + len); vPixel++){      // Loop to set the pixels in the vertical line
-                //setPixel(x, vPixel)
                 pixels.push([x, vPixel]);
             }
         }
@@ -545,7 +503,7 @@ namespace OLED {
     //% height.min=1 height.max=64
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
-    export function drawRect2(filled: FillSelection, width: number, height: number, x: number, y: number) {
+    export function drawRect(filled: FillSelection, width: number, height: number, x: number, y: number) {
 
         if (!x)    // If variable 'x' has not been used, default to x position of 0
             x = 0
@@ -567,10 +525,10 @@ namespace OLED {
             }
             drawShape(pixels)
         }else{
-            drawLine2(LineDirectionSelection.horizontal, width, x, y)
-            drawLine2(LineDirectionSelection.horizontal, width, x, y + height-1)
-            drawLine2(LineDirectionSelection.vertical, height, x, y)
-            drawLine2(LineDirectionSelection.vertical, height, x + width-1, y)
+            drawLine(LineDirectionSelection.horizontal, width, x, y)
+            drawLine(LineDirectionSelection.horizontal, width, x, y + height-1)
+            drawLine(LineDirectionSelection.vertical, height, x, y)
+            drawLine(LineDirectionSelection.vertical, height, x + width-1, y)
            
         }
         
@@ -581,34 +539,30 @@ namespace OLED {
     //% y.defl=32
     //% r.defl=10
     //% weight=0
-    export function drawCircle(x: number, y: number, r: number) {
-        let pixels: Array<Array<number>> = []
+    //% group="Draw"
+    export function drawCircle(filled: FillSelection, x: number, y: number, r: number) {
+        if(filled==FillSelection.filled){
+            for (let dx = -r; dx <= r; dx++) {
+                let height = Math.floor(Math.sqrt(r * r - dx * dx));
+                drawLine(LineDirectionSelection.vertical, height*2, x + dx, y-height)
+            }
+        }else{
+            let pixels: Array<Array<number>> = []
 
-        let theta = 0;
-        let step = Math.PI / 90;  // Adjust step for smoothness
-
-        while (theta < 2 * Math.PI) {
-            let xPos = Math.floor(x + r * Math.cos(theta));
-            let yPos = Math.floor(y + r * Math.sin(theta));
-            //setPixel(xPos, yPos)
-            pixels.push([xPos, yPos]);
-            theta += step;
+            let theta = 0;
+            let step = Math.PI / 90;  // Adjust step for smoothness
+    
+            while (theta < 2 * Math.PI) {
+                let xPos = Math.floor(x + r * Math.cos(theta));
+                let yPos = Math.floor(y + r * Math.sin(theta));
+                pixels.push([xPos, yPos]);
+                theta += step;
+            }
+            drawShape(pixels)
         }
-        drawShape(pixels)
+        
     }
     
-    //% block="draw filled circle at x: $x y: $y radius: $r"
-    //% x.defl=64
-    //% y.defl=32
-    //% r.defl=10
-    //% weight=0
-    export function drawFilledCircle(x: number, y: number, r: number) {
-        for (let dx = -r; dx <= r; dx++) {
-            let height = Math.floor(Math.sqrt(r * r - dx * dx));
-            drawLine2(LineDirectionSelection.vertical, height*2, x + dx, y-height)
-            //drawLine(x + dx, y - height, x + dx, y + height);
-        }
-    }
     //% block="initialize OLED with width $width height $height"
     //% width.defl=128
     //% height.defl=64
