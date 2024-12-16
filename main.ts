@@ -53,9 +53,9 @@ namespace OLED {
     const SSD1306_COMSCANDEC = 0xC8
     const SSD1306_SEGREMAP = 0xA0
     const SSD1306_CHARGEPUMP = 0x8D
-    const chipAdress = 0x3C
     const xOffset = 0
     const yOffset = 0
+    let chipAdress = 0x3C
     let charX = 0
     let charY = 0
     let displayWidth = 128
@@ -83,7 +83,7 @@ namespace OLED {
         fontZoom = zoom
     }
 
-    //% blockId="VIEW128x64_show_buffer" block="show Buffer"
+    //% block="draw Buffer"
     //% weight=80
     //% group="Draw"
     export function drawBuff(x1: number=0, x2: number=127, page1: number=0, page2: number=7) {
@@ -447,7 +447,7 @@ namespace OLED {
      * @param y is start position on the Y axis, eg: 0
      * @param len is the length of line, length is the number of pixels, eg: 10
      */
-    //% blockId="VIEW128x64_draw_line" block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
+    //% block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
     //% weight=72 blockGap=8
     //% group="Draw"
     //% x.min=0, x.max=127
@@ -535,7 +535,7 @@ namespace OLED {
      * @param x is the start position on the X axis, eg: 0
      * @param y is the start position on the Y axis, eg: 0
      */
-    //% blockId="VIEW128x64_draw_rect" block="draw a %filled rectangle %width|width %height|height from position x %x|y %y"
+    //% block="draw a %filled rectangle %width|width %height|height from position x %x|y %y"
     //% weight=71 blockGap=8
     //% group="Draw"
     //% width.min=1 width.max=128
@@ -614,11 +614,13 @@ namespace OLED {
         drawBuff()
     }
     
-    //% block="initialize OLED with width $width height $height"
+    //% block="initialize OLED with width $width height $height address $address"
     //% width.defl=128
     //% height.defl=64
+    //% address.defl=60
     //% weight=9
-    export function init(width: number, height: number) {
+    export function init(width: number, height: number, address:number=60) {
+        chipAdress = address
         command(SSD1306_DISPLAYOFF);
         command(SSD1306_SETDISPLAYCLOCKDIV);
         command(0x80);                                  // the suggested ratio 0x80
