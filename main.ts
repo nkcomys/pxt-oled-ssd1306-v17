@@ -89,7 +89,12 @@ namespace OLED {
     export function drawBuff(x1: number=0, x2: number=127, page1: number=0, page2: number=7) {
 
 
-        let line = pins.createBuffer(2)
+        let c = ((x2-x1)+1) * ((page2-page1)+1)
+        let bufferSize=c
+        if(bufferSize>16){
+            bufferSize=16
+        }
+        let line = pins.createBuffer(bufferSize+1)
         line[0] = 0x40
 
         for (let page = page1; page <= page2; page++) {
@@ -111,8 +116,13 @@ namespace OLED {
                 haveOther = true
                 
                 i++;
-                if(i==2){
+                if(i==bufferSize){
                     pins.i2cWriteBuffer(chipAdress, line)
+                    c-=bufferSize
+                    if(c<16){
+                        line = pins.createBuffer(c+1)
+                        line[0] = 0x40
+                    }
                     i=1
                     haveOther = false
                 }
