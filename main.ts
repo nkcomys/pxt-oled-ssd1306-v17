@@ -105,19 +105,22 @@ namespace OLED {
 
 
             let i = 1;
+            let haveOther = false
             for (let x = x1; x <= x2; x++) {
 
                 let ind = x + page * 128 + 1
                 line[i]  = screenBuf[ind]
+                haveOther = true
                 
                 i++;
                 if(i==16){
                     pins.i2cWriteBuffer(chipAdress, line)
                     i=1
+                    haveOther = false
                 }
 
             }
-            if(i<16){
+            if(haveOther){
                 pins.i2cWriteBuffer(chipAdress, line)
             }
 
