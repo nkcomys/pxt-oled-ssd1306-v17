@@ -96,7 +96,7 @@ namespace OLED {
             const element = screenBuf[index];
             r += element+","
         }
-        return ;
+        return r;
     }
 
     //% block="clear OLED display"
