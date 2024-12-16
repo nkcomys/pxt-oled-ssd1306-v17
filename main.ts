@@ -512,11 +512,11 @@ namespace OLED {
     //% blockId="VIEW128x64_draw_rect" block="draw a %filled rectangle %width|width %height|height from position x %x|y %y"
     //% weight=71 blockGap=8
     //% group="Draw"
-    //% inlineInputMode=inline
     //% width.min=1 width.max=128
     //% height.min=1 height.max=64
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
+    //% inlineInputMode=inline
     export function drawRect(filled: FillSelection, width: number, height: number, x: number, y: number) {
 
         if (!x)    // If variable 'x' has not been used, default to x position of 0
