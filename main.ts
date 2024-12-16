@@ -116,9 +116,9 @@ namespace OLED {
                 haveOther = true
                 
                 i++;
-                if(i==bufferSize){
+                if(i==bufferSize+1){
                     pins.i2cWriteBuffer(chipAdress, line)
-                    c-=bufferSize
+                    c -= bufferSize
                     if(c<16){
                         line = pins.createBuffer(c+1)
                         line[0] = 0x40
