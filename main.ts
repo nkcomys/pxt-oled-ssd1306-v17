@@ -256,8 +256,17 @@ namespace OLED {
                 line[1] = charNumber
             }
 
-            let ind = x + y * 128 + 1 + i
-            screenBuf[ind] = line[1];
+            
+            if(fontZoom==1){
+                let ind = x + y * 128 + 1 + i
+                screenBuf[ind] = line[1];
+            }else{
+                let ind = x + y * 128 + 1 + i*2
+                screenBuf[ind] = line[1];
+                screenBuf[ind+1] = line[1];
+            }
+
+
 
             pins.i2cWriteBuffer(chipAdress, line, false)
 
@@ -302,9 +311,14 @@ namespace OLED {
                 }
 
 
-                let ind = x + y * 128 + 1 + i
-
-                screenBuf[ind] = line[1]
+                if(fontZoom==1){
+                    let ind = x + y * 128 + 1 + i
+                    screenBuf[ind] = line[1];
+                }else{
+                    let ind = x + y * 128 + 1 + i*2
+                    screenBuf[ind] = line[1];
+                    screenBuf[ind+1] = line[1];
+                }
 
                 pins.i2cWriteBuffer(chipAdress, line, false)
 
