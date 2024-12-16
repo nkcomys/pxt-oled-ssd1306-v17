@@ -88,13 +88,7 @@ namespace OLED {
     //% blockId="VIEW128x64_print_buffer" block="print Buffer"
     //% weight=80
     export function getPrintBuff():string {
- 
-        let r = "";
-        for (let index = 0; index < screenBuf.length; index++) {
-            const element = screenBuf[index];
-            r = r + "" + element.toString(2)
-        }
-        return r;
+        return screenBuf.join(', ');
     }
 
     //% block="clear OLED display"
