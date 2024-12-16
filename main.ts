@@ -370,20 +370,19 @@ namespace OLED {
         }
         let page1 =  y1 >> 3
         let page2 =  y2 >> 3
-        let line = pins.createBuffer(2)
-        line[0] = 0x40
+        //let line = pins.createBuffer(2)
+        //line[0] = 0x40
     
         for (let page = page1; page <= page2; page++) {
-
+/*
             command(SSD1306_SETCOLUMNADRESS)
             command(x1)
             command(x2)
             command(SSD1306_SETPAGEADRESS)
             command(page)
             command(page)
-
-            let i = 1;
-            let haveOther = false
+*/
+            //line[1] = 0x00
 
             for (let x = x1; x <= x2; x++) {
 
@@ -403,21 +402,17 @@ namespace OLED {
                     }
                 }
 
-                line[i]  = screenBuf[ind]
-                haveOther = true
-                i++;
-                if(i==17){
-                    pins.i2cWriteBuffer(chipAdress, line)
-                    i=1
-                    haveOther = false
-                }
+                //line[1]  = screenBuf[ind]
+                
+                
+                //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
+                //pins.i2cWriteBuffer(chipAdress, line)
 
-            }
-            if(haveOther){
-                pins.i2cWriteBuffer(chipAdress, line)
             }
 
         }
+
+        getShowBuff()
 
     }
 
