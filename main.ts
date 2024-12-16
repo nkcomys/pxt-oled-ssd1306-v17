@@ -123,7 +123,7 @@ namespace OLED {
                 if(i==bufferSize+1){
                     pins.i2cWriteBuffer(chipAdress, line)
                     c -= bufferSize
-                    if(c!=0 && c<16){
+                    if(c!=0 && c<16 && bufferSize!=1){
                         bufferSize=1
                         line = pins.createBuffer(bufferSize+1)
                         line[0] = 0x40
