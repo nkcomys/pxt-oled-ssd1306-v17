@@ -62,8 +62,6 @@ namespace OLED {
     let displayHeight = 64 / 8
     let screenSize = 0
     //let font: Array<Array<number>>
-    let loadStarted: boolean;
-    let loadPercent: number;
 
     let fontZoom: number = 1;
 
@@ -83,22 +81,6 @@ namespace OLED {
     export function setFontZomm(zoom: number) {
         fontZoom = zoom
     }
-
-
-    //% blockId="VIEW128x64_print_buffer" block="print Buffer"
-    //% weight=80
-    export function getPrintBuff():string {
- 
-        let r = "";
-
-        
-        for (let index = 0; index < screenBuf.length; index++) {
-            const element = screenBuf[index];
-            r += element+","
-        }
-        return r;
-    }
-
 
     //% blockId="VIEW128x64_show_buffer" block="show Buffer"
     //% weight=80
@@ -136,8 +118,6 @@ namespace OLED {
     //% block="clear OLED display"
     //% weight=3
     export function clear() {
-        loadStarted = false
-        loadPercent = 0
         command(SSD1306_SETCOLUMNADRESS)
         command(0x00)
         command(displayWidth - 1)
@@ -157,77 +137,7 @@ namespace OLED {
         charY = yOffset
     }
 
-    function drawLoadingFrame() {
-        command(SSD1306_SETCOLUMNADRESS)
-        command(0x00)
-        command(displayWidth - 1)
-        command(SSD1306_SETPAGEADRESS)
-        command(0x00)
-        command(displayHeight - 1)
-        let col = 0
-        let page = 0
-        let data = pins.createBuffer(17);
-        data[0] = 0x40; // Data Mode
-        let i = 1
-        for (let page = 0; page < displayHeight; page++) {
-            for (let col = 0; col < displayWidth; col++) {
-                if (page === 3 && col > 12 && col < displayWidth - 12) {
-                    data[i] = 0x60
-                } else if (page === 5 && col > 12 && col < displayWidth - 12) {
-                    data[i] = 0x06
-                } else if (page === 4 && (col === 12 || col === 13 || col === displayWidth - 12 || col === displayWidth - 13)) {
-                    data[i] = 0xFF
-                } else {
-                    data[i] = 0x00
-                }
-                if (i === 16) {
-                    pins.i2cWriteBuffer(chipAdress, data, false)
-                    i = 1
-                } else {
-                    i++
-                }
-
-            }
-        }
-        charX = 30
-        charY = 2
-        writeString("Loading:")
-    }
-    function drawLoadingBar(percent: number) {
-        charX = 78
-        charY = 2
-        let num = Math.floor(percent)
-        writeNum(num)
-        writeString("%")
-        let width = displayWidth - 14 - 13
-        let lastStart = width * (loadPercent / displayWidth)
-        command(SSD1306_SETCOLUMNADRESS)
-        command(14 + lastStart)
-        command(displayWidth - 13)
-        command(SSD1306_SETPAGEADRESS)
-        command(4)
-        command(5)
-        let data = pins.createBuffer(2);
-        data[0] = 0x40; // Data Mode
-        data[1] = 0x7E
-        for (let i = lastStart; i < width * (Math.floor(percent) / 100); i++) {
-            pins.i2cWriteBuffer(chipAdress, data, false)
-        }
-        loadPercent = num
-    }
-
-    //% block="draw loading bar at $percent percent"
-    //% percent.min=0 percent.max=100
-    //% weight=2
-    export function drawLoading(percent: number) {
-        if (loadStarted) {
-            drawLoadingBar(percent)
-        } else {
-            drawLoadingFrame()
-            drawLoadingBar(percent)
-            loadStarted = true
-        }
-    }
+    
     //% block="clear line $line"
     //% line.min=0 line.max=7
     //% weight=6
@@ -338,15 +248,17 @@ namespace OLED {
     
                         result = (result << 2) | (bit << 1) | bit;
                     }
-                    charNumber = result & 0xFFF;
+                    charNumber = result & 0xFF;
                 }
 
-                let ind = x + y * 128 + 1
-                screenBuf[ind] = charNumber
-
-                line[1] = screenBuf[ind]
-
+                charNumber = charNumber & 0xFF;
+                
+                line[1] = charNumber
             }
+
+            let ind = x + y * 128 + 1 + i
+            screenBuf[ind] = line[1];
+
             pins.i2cWriteBuffer(chipAdress, line, false)
 
             if(fontZoom!=1)
@@ -383,13 +295,17 @@ namespace OLED {
                         charNumber = result >> 8;
                     }
 
-                    let ind = x + y * 128 + 1
+                    charNumber = charNumber & 0xFF;
 
-                    screenBuf[ind] = charNumber
-
-                    line[1] = screenBuf[ind]
+                    line[1] = charNumber
 
                 }
+
+
+                let ind = x + y * 128 + 1 + i
+
+                screenBuf[ind] = line[1]
+
                 pins.i2cWriteBuffer(chipAdress, line, false)
 
                 if(fontZoom!=1)
@@ -970,8 +886,6 @@ namespace OLED {
     00191D1712
     003C3C3C3C
     0000000000`
-        loadStarted = false
-        loadPercent = 0
         clear()
     }
 } 
