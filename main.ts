@@ -99,6 +99,40 @@ namespace OLED {
         return r;
     }
 
+
+    //% blockId="VIEW128x64_show_buffer" block="show Buffer"
+    //% weight=80
+    export function getShowBuff() {
+ 
+        let x1 = 0;
+        let x2 = 127;
+
+        let line = pins.createBuffer(2)
+        line[0] = 0x40
+
+        for (let page = 0; page <= 7; page++) {
+
+            command(SSD1306_SETCOLUMNADRESS)
+            command(x1)
+            command(x2)
+            command(SSD1306_SETPAGEADRESS)
+            command(page)
+            command(page)
+
+
+            for (let x = x1; x <= x2; x++) {
+
+                let ind = x + page * 128 + 1
+                line[1]  = screenBuf[ind]
+                
+                //line[1] |= pins.i2cReadBuffer(chipAdress, 2)[1]
+                pins.i2cWriteBuffer(chipAdress, line)
+
+            }
+
+        }
+    }
+
     //% block="clear OLED display"
     //% weight=3
     export function clear() {
