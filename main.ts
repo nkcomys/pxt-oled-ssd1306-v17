@@ -534,7 +534,7 @@ namespace OLED {
         
     }
 
-    //% block="draw circle at x: $x y: $y radius: $r"
+    //% block="draw %filled circle at x: $x y: $y radius: $r"
     //% x.defl=64
     //% y.defl=32
     //% r.defl=10
