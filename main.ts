@@ -113,7 +113,7 @@ namespace OLED {
                 haveOther = true
                 
                 i++;
-                if(i==16){
+                if(i==17){
                     pins.i2cWriteBuffer(chipAdress, line)
                     i=1
                     haveOther = false
