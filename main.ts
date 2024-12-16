@@ -90,10 +90,9 @@ namespace OLED {
 
 
         let c = ((x2-x1)+1) * ((page2-page1)+1)
-        let bufferSize=c
-        if(bufferSize>16){
-            bufferSize=16
-        }
+        let bufferSize=2
+
+        
         let line = pins.createBuffer(bufferSize+1)
         line[0] = 0x40
 
@@ -118,11 +117,6 @@ namespace OLED {
                 i++;
                 if(i==bufferSize+1){
                     pins.i2cWriteBuffer(chipAdress, line)
-                    c -= bufferSize
-                    if(c<16){
-                        line = pins.createBuffer(c+1)
-                        line[0] = 0x40
-                    }
                     i=1
                     haveOther = false
                 }
