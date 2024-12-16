@@ -287,7 +287,7 @@ namespace OLED {
             command(x + 5 + 6)
         command(SSD1306_SETPAGEADRESS)
         command(y)
-        command(y + 1)
+        command(y)
         let line = pins.createBuffer(2)
         line[0] = 0x40
         for (let i = 0; i < 6; i++) {
@@ -310,7 +310,7 @@ namespace OLED {
                 let ind = x + y * 128 + 1
                 screenBuf[ind] = charNumber
 
-                line[1] = charNumber
+                line[1] = screenBuf[ind]
 
             }
             pins.i2cWriteBuffer(chipAdress, line, false)
@@ -350,9 +350,10 @@ namespace OLED {
                     }
 
                     let ind = x + y * 128 + 1
+
                     screenBuf[ind] = charNumber
 
-                    line[1] = charNumber
+                    line[1] = screenBuf[ind]
 
                 }
                 pins.i2cWriteBuffer(chipAdress, line, false)
@@ -411,7 +412,7 @@ namespace OLED {
                             let screenPixel = (screenBuf[ind] | (1 << shift_page))
                             screenBuf[ind] = screenPixel
 
-                            line[1] |= Math.pow(2, shift_page)
+                            //line[1] |= Math.pow(2, shift_page)
                         }
                     }
                 }
