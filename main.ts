@@ -89,7 +89,7 @@ namespace OLED {
     export function drawBuff(x1: number=0, x2: number=127, page1: number=0, page2: number=7) {
 
 
-        let line = pins.createBuffer(17)
+        let line = pins.createBuffer(2)
         line[0] = 0x40
 
         for (let page = page1; page <= page2; page++) {
@@ -111,7 +111,7 @@ namespace OLED {
                 haveOther = true
                 
                 i++;
-                if(i==17){
+                if(i==2){
                     pins.i2cWriteBuffer(chipAdress, line)
                     i=1
                     haveOther = false
@@ -565,7 +565,7 @@ namespace OLED {
         }
 
         if(drawNow)
-            drawBuff(x,x+width-1)
+            drawBuff(x,x+width-1,y >> 3, (y+height-1) >> 3)
         
     }
 
