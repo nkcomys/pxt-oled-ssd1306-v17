@@ -350,7 +350,7 @@ namespace OLED {
         }
 
     }
-    function drawShape(pixels: Array<Array<number>>) {
+    function drawShape(pixels: Array<Array<number>>, drawNow:boolean=true) {
         let x1 = displayWidth
         let y1 = displayHeight * 8
         let x2 = 0
@@ -413,7 +413,8 @@ namespace OLED {
 
         }
 
-        drawBuff(x1,x2,page1,page2)
+        if(drawNow)
+            drawBuff()
 
     }
 
@@ -531,16 +532,19 @@ namespace OLED {
         // Draw the lines for each side of the rectangle
         if(filled==FillSelection.filled){
             let pixels: Array<Array<number>> = []
-            for(let dx = x; dx<=x+width-1; dx++){
-                for(let dy = y; dy<=y+height-1; dy++){
+            for(let dy = y; dy<=y+height-1; dy++){
+                for(let dx = x; dx<=x+width-1; dx++){
                     pixels.push([dx,dy]);
                     if(pixels.length>128){
-                        drawShape(pixels)
+                        drawShape(pixels, false)
                         pixels = [];
                     }
                 }
             }
-            drawShape(pixels)
+            if(pixels.length>0)
+                drawShape(pixels, false)
+
+            drawBuff()
         }else{
             drawLine(LineDirectionSelection.horizontal, width, x, y)
             drawLine(LineDirectionSelection.horizontal, width, x, y + height-1)
