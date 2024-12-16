@@ -563,7 +563,9 @@ namespace OLED {
             drawLine(LineDirectionSelection.vertical, height, x + width-1, y, false)
            
         }
-        drawBuff()
+
+        if(drawNow)
+            drawBuff(x,x+width-1)
         
     }
 
