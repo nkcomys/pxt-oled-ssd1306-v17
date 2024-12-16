@@ -444,7 +444,7 @@ namespace OLED {
     //% y.min=0, y.max=63
     //% len.min=-128, len.max=128
     //% inlineInputMode=inline
-    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number) {
+    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, drawNow:boolean=true) {
 
         let pixels: Array<Array<number>> = []
 
@@ -514,7 +514,7 @@ namespace OLED {
             }
         }
 
-        drawShape(pixels)
+        drawShape(pixels, drawNow)
     }
 
     /**
@@ -533,7 +533,7 @@ namespace OLED {
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
     //% inlineInputMode=inline
-    export function drawRect(filled: FillSelection, width: number, height: number, x: number, y: number) {
+    export function drawRect(filled: FillSelection, width: number, height: number, x: number, y: number, drawNow:boolean=true) {
 
         if (!x)    // If variable 'x' has not been used, default to x position of 0
             x = 0
@@ -556,14 +556,14 @@ namespace OLED {
             if(pixels.length>0)
                 drawShape(pixels, false)
 
-            drawBuff()
         }else{
-            drawLine(LineDirectionSelection.horizontal, width, x, y)
-            drawLine(LineDirectionSelection.horizontal, width, x, y + height-1)
-            drawLine(LineDirectionSelection.vertical, height, x, y)
-            drawLine(LineDirectionSelection.vertical, height, x + width-1, y)
+            drawLine(LineDirectionSelection.horizontal, width, x, y, false)
+            drawLine(LineDirectionSelection.horizontal, width, x, y + height-1, false)
+            drawLine(LineDirectionSelection.vertical, height, x, y, false)
+            drawLine(LineDirectionSelection.vertical, height, x + width-1, y, false)
            
         }
+        drawBuff()
         
     }
 
@@ -578,7 +578,7 @@ namespace OLED {
         if(filled==FillSelection.filled){
             for (let dx = -r; dx <= r; dx++) {
                 let height = Math.floor(Math.sqrt(r * r - dx * dx));
-                drawLine(LineDirectionSelection.vertical, height*2, x + dx, y-height)
+                drawLine(LineDirectionSelection.vertical, height*2, x + dx, y-height, false)
             }
         }else{
             let pixels: Array<Array<number>> = []
@@ -590,11 +590,16 @@ namespace OLED {
                 let xPos = Math.floor(x + r * Math.cos(theta));
                 let yPos = Math.floor(y + r * Math.sin(theta));
                 pixels.push([xPos, yPos]);
+                if(pixels.length>128){
+                    drawShape(pixels, false)
+                    pixels = [];
+                }
                 theta += step;
             }
-            drawShape(pixels)
+            drawShape(pixels, false)
         }
         
+        drawBuff()
     }
     
     //% block="initialize OLED with width $width height $height"
