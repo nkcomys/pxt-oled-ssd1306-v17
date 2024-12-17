@@ -403,7 +403,7 @@ namespace OLED {
             let charNumber = cross.getNumber(NumberFormat.UInt8BE, i)
             charNumber = charNumber & 0xFF;
             line[int] = charNumber
-            let ind = x+(i % 48) + (y+Math.floor(i/48/8)) * 128 + 1
+            let ind = x+(i % 48) + (y+Math.floor(i/48)) * 128 + 1
             screenBuf[ind] = charNumber;
             int++;
             if(int==17){
