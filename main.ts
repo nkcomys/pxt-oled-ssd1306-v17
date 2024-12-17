@@ -358,80 +358,21 @@ namespace OLED {
         }
 
     }
-    function drawShape(pixels: Array<Array<number>>, drawNow:boolean=true) {
-        let x1 = displayWidth
-        let y1 = displayHeight * 8
-        let x2 = 0
-        let y2 = 0
-        for (let i = 0; i < pixels.length; i++) {
-            if (pixels[i][0] < x1) {
-                x1 = pixels[i][0]
-            }
-            if (pixels[i][0] > x2) {
-                x2 = pixels[i][0]
-            }
-            if (pixels[i][1] < y1) {
-                y1 = pixels[i][1]
-            }
-            if (pixels[i][1] > y2) {
-                y2 = pixels[i][1]
-            }
-        }
-        let page1 =  y1 >> 3
-        let page2 =  y2 >> 3
-        //let line = pins.createBuffer(2)
-        //line[0] = 0x40
-
+    function drawShape(pixels: Array<Array<number>>, clear:boolean = false, drawNow:boolean=true) {
 
         for (let i = 0; i < pixels.length; i++) {
             let y = pixels[i][1];
             let x = pixels[i][0];
 
-
             let page = y >> 3
             let ind = x + page * 128 + 1
             let shift_page = y % 8
             let screenPixel = (screenBuf[ind] | (1 << shift_page))
+            if(clear){
+                screenPixel = (screenPixel ^ (1 << shift_page))
+            }
             screenBuf[ind] = screenPixel
         }
-    /*
-        for (let page = page1; page <= page2; page++) {
-
-            command(SSD1306_SETCOLUMNADRESS)
-            command(x1)
-            command(x2)
-            command(SSD1306_SETPAGEADRESS)
-            command(page)
-            command(page)
-
-            //line[1] = 0x00
-
-            for (let x = x1; x <= x2; x++) {
-
-                let ind = x + page * 128 + 1
-
-                for (let i = 0; i < pixels.length; i++) {
-                    if (pixels[i][0] === x) {
-                        let y = pixels[i][1];
-                        if ( (y >> 3) === page) {
-
-                            let shift_page = y % 8
-                            let screenPixel = (screenBuf[ind] | (1 << shift_page))
-                            screenBuf[ind] = screenPixel
-
-                            //line[1] |= Math.pow(2, shift_page)
-                        }
-                    }
-                }
-
-                line[1]  = screenBuf[ind]
-                
-                pins.i2cWriteBuffer(chipAdress, line)
-
-            }
-
-        }
-    */
 
         if(drawNow)
             drawBuff()
@@ -445,14 +386,15 @@ namespace OLED {
      * @param y is start position on the Y axis, eg: 0
      * @param len is the length of line, length is the number of pixels, eg: 10
      */
-    //% block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
+    //% block="draw a %lineDirection | line with length of %len starting at x %x|y %y,  clear: %clear"
     //% weight=72 blockGap=8
     //% group="Draw"
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
     //% len.min=-128, len.max=128
+    //% clear.defl=false
     //% inlineInputMode=inline
-    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, drawNow:boolean=true) {
+    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, clear:boolean = false, drawNow:boolean=true) {
 
         let pixels: Array<Array<number>> = []
 
@@ -522,7 +464,7 @@ namespace OLED {
             }
         }
 
-        drawShape(pixels, drawNow)
+        drawShape(pixels, clear, drawNow)
     }
 
     /**
@@ -533,15 +475,16 @@ namespace OLED {
      * @param x is the start position on the X axis, eg: 0
      * @param y is the start position on the Y axis, eg: 0
      */
-    //% block="draw a %filled rectangle %width|width %height|height from position x %x|y %y"
+    //% block="draw a %filled rectangle %width|width %height|height from position x %x|y %y,  clear: %clear"
     //% weight=71 blockGap=8
     //% group="Draw"
     //% width.min=1 width.max=128
     //% height.min=1 height.max=64
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
+    //% clear.defl=false
     //% inlineInputMode=inline
-    export function drawRect(filled: FillSelection, width: number, height: number, x: number, y: number, drawNow:boolean=true) {
+    export function drawRect(filled: FillSelection, width: number, height: number, x: number, y: number, clear:boolean = false, drawNow:boolean=true) {
 
         if (!x)    // If variable 'x' has not been used, default to x position of 0
             x = 0
@@ -556,19 +499,19 @@ namespace OLED {
                 for(let dx = x; dx<=x+width-1; dx++){
                     pixels.push([dx,dy]);
                     if(pixels.length>128){
-                        drawShape(pixels, false)
+                        drawShape(pixels, clear, false)
                         pixels = [];
                     }
                 }
             }
             if(pixels.length>0)
-                drawShape(pixels, false)
+                drawShape(pixels, clear, false)
 
         }else{
-            drawLine(LineDirectionSelection.horizontal, width, x, y, false)
-            drawLine(LineDirectionSelection.horizontal, width, x, y + height-1, false)
-            drawLine(LineDirectionSelection.vertical, height, x, y, false)
-            drawLine(LineDirectionSelection.vertical, height, x + width-1, y, false)
+            drawLine(LineDirectionSelection.horizontal, width, x, y, clear, false)
+            drawLine(LineDirectionSelection.horizontal, width, x, y + height-1, clear, false)
+            drawLine(LineDirectionSelection.vertical, height, x, y, clear, false)
+            drawLine(LineDirectionSelection.vertical, height, x + width-1, y, clear, false)
            
         }
 
@@ -577,18 +520,19 @@ namespace OLED {
         
     }
 
-    //% block="draw %filled circle at x: $x y: $y radius: $r"
+    //% block="draw %filled circle at x: $x y: $y radius: $r,  clear: %clear"
     //% x.defl=64
     //% y.defl=32
     //% r.defl=10
     //% weight=0
+    //% clear.defl=false
     //% group="Draw"
     //% inlineInputMode=inline
-    export function drawCircle(filled: FillSelection, x: number, y: number, r: number) {
+    export function drawCircle(filled: FillSelection, x: number, y: number, r: number, clear:boolean = false) {
         if(filled==FillSelection.filled){
             for (let dx = -r; dx <= r; dx++) {
                 let height = Math.floor(Math.sqrt(r * r - dx * dx));
-                drawLine(LineDirectionSelection.vertical, height*2, x + dx, y-height, false)
+                drawLine(LineDirectionSelection.vertical, height*2, x + dx, y-height, clear, false)
             }
         }else{
             let pixels: Array<Array<number>> = []
@@ -601,12 +545,12 @@ namespace OLED {
                 let yPos = Math.floor(y + r * Math.sin(theta));
                 pixels.push([xPos, yPos]);
                 if(pixels.length>128){
-                    drawShape(pixels, false)
+                    drawShape(pixels, clear, false)
                     pixels = [];
                 }
                 theta += step;
             }
-            drawShape(pixels, false)
+            drawShape(pixels, clear, false)
         }
         
         drawBuff()
