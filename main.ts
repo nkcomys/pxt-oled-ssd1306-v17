@@ -155,19 +155,24 @@ namespace OLED {
     //% weight=6
     //% group="Text"
     export function clearLine(line: number) {
-        charX = 0;
-        charY = line;
-        let str = " ";
-        for (let i = 0; i < 20; i++) {
-            if (charX > displayWidth - 6) {
-                charX = 0;
-            }
-            drawChar(charX, charY, str.charAt(i))
-            if(fontZoom==1)
-                charX += 6
-            else
-                charX += 12
+        command(SSD1306_SETCOLUMNADRESS)
+        command(0x00)
+        command(displayWidth - 1)
+        command(SSD1306_SETPAGEADRESS)
+        command(line)
+        command(line)
+        let data = pins.createBuffer(17);
+        data[0] = 0x40; // Data Mode
+        for (let i = 1; i < 17; i++) {
+            data[i] = 0x00
         }
+        // send display buffer in 16 byte chunks
+        for (let i = 0; i < displayWidth; i += 16) {
+            pins.i2cWriteBuffer(chipAdress, data, false)
+        }
+
+        charX = xOffset
+        charY = yOffset
     }
     //% block="show string $str at $line"
     //% line.min=0 line.max=7
