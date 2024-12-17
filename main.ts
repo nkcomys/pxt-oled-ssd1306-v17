@@ -28,6 +28,7 @@ namespace OLED {
     }
 
     let font: Buffer;
+    let cross: Buffer;
 
 
     const SSD1306_SETCONTRAST = 0x81
@@ -379,6 +380,43 @@ namespace OLED {
 
     }
 
+    //% block="draw a cross starting at x %x|y %y"
+    //% weight=72 blockGap=8
+    //% group="Draw"
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=7
+    //% inlineInputMode=inline
+    export function drawCross(x: number, y: number) {
+
+        command(SSD1306_SETCOLUMNADRESS)
+        command(x)
+        command(x + 47)
+        command(SSD1306_SETPAGEADRESS)
+        command(y)
+        command(y + 5)
+        let line = pins.createBuffer(17)
+        line[0] = 0x40
+
+        let int = 1;
+        for(let i=0; i< 48*6;i++){
+            
+            let charNumber = cross.getNumber(NumberFormat.UInt8BE, i)
+            charNumber = charNumber & 0xFF;
+            line[int] = charNumber
+            let ind = x+(i % 48) + (y+(Math.floor(i/48) >> 3)) * 128 + 1
+            screenBuf[ind] = charNumber;
+            int++;
+            if(int==17){
+                int=1
+                pins.i2cWriteBuffer(chipAdress, line, false)
+            }
+        }
+        
+
+        
+
+    }
+
     /**
      * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
      * @param lineDirection is the selection of either horizontal line or vertical line
@@ -593,6 +631,7 @@ namespace OLED {
         screenSize = displayWidth * displayHeight
         charX = xOffset
         charY = yOffset
+        cross = hex`60F0F87C3E1F0F070301000000000000000000000000000000000000000000000000000000000103070F1F3E7CF8F06000000000000080C0E0F0F87C3E1F0F0703010000000000000000000000000103070F1F3E7CF8F0E0C080000000000000000000000000000000000000000080C0E0F0F87C3E1F0F07070F1F3E7CF8F0E0C080000000000000000000000000000000000000000000000000000000000103070F1F3E7CF8F0E0E0F0F87C3E1F0F07030100000000000000000000000000000000000000000103070F1F3E7CF8F0E0C08000000000000000000000000080C0E0F0F87C3E1F0F070301000000000000060F1F3E7EF8F0E0C0800000000000000000000000000000000000000000000000000000000080C0E0F0F87C3E1F0F06`
         font = hex`
     0000000000
     3E5B4F5B3E
