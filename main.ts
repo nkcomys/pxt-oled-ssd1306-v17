@@ -88,9 +88,10 @@ namespace OLED {
     //% group="Draw"
     export function drawBuff(x1: number=0, x2: number=127, page1: number=0, page2: number=7) {
 
+        let pagex1 = x1 >> 4
+        let pagex2 = x2 >> 4
 
-        let c = ((x2-x1)+1) * ((page2-page1)+1)
-        let bufferSize=1
+        let bufferSize=16
         
         let line = pins.createBuffer(bufferSize+1)
         line[0] = 0x40
@@ -98,31 +99,25 @@ namespace OLED {
         for (let page = page1; page <= page2; page++) {
 
             command(SSD1306_SETCOLUMNADRESS)
-            command(x1)
-            command(x2)
+            command(pagex1*16)
+            command(pagex2*16+15)
             command(SSD1306_SETPAGEADRESS)
             command(page)
             command(page)
 
 
             let i = 1;
-            let haveOther = false
-            for (let x = x1; x <= x2; x++) {
+            for (let x = pagex1*16; x <= pagex2*16+15; x++) {
 
                 let ind = x + page * 128 + 1
                 line[i]  = screenBuf[ind]
-                haveOther = true
                 
                 i++;
                 if(i==bufferSize+1){
                     pins.i2cWriteBuffer(chipAdress, line)
                     i=1
-                    haveOther = false
                 }
 
-            }
-            if(haveOther){
-                pins.i2cWriteBuffer(chipAdress, line)
             }
 
         }
