@@ -171,6 +171,11 @@ namespace OLED {
             pins.i2cWriteBuffer(chipAdress, data, false)
         }
 
+        for (let x = 0; x < displayWidth; x++ ) {
+            let ind = x + line * 128 + 1
+            screenBuf[ind] = 0x00
+        }
+
         charX = xOffset
         charY = yOffset
     }
