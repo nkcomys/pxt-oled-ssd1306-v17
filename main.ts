@@ -436,17 +436,18 @@ namespace OLED {
 
         for (let dx = 0; dx < 16; dx++) {
             for (let dy = 0; dy < 16; dy++) {
-            let x = charX+dx;
-            let y = charY*8+dy;
+                let x = charX+dx;
+                let y = charY*8+dy;
 
-            let page = y >> 3
-            let ind = x + page * 128 + 1
-            let shift_page = y % 8
-            let screenPixel = (screenBuf[ind] | (1 << shift_page))
-            if (!im.pixel(dx, dy)) {
-                screenPixel = (screenPixel ^ (1 << shift_page))
-           
-            screenBuf[ind] = screenPixel
+                let page = y >> 3
+                let ind = x + page * 128 + 1
+                let shift_page = y % 8
+                let screenPixel = (screenBuf[ind] | (1 << shift_page))
+                if (!im.pixel(dx, dy)) {
+                    screenPixel = (screenPixel ^ (1 << shift_page))
+            
+                screenBuf[ind] = screenPixel
+                }
         }
         drawBuff(charX,charX+15,charY,charY+1)
     }
