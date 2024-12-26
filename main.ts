@@ -29,6 +29,8 @@ namespace OLED {
 
     let font: Buffer;
     let cross: Buffer;
+    let smoke: Buffer;
+    let firebutton: Buffer;
 
 
     const SSD1306_SETCONTRAST = 0x81
@@ -197,6 +199,15 @@ namespace OLED {
             else
                 charX += 12
         }
+    }
+    //% block="setXY $x at $line"
+    //% x.min=0 x.max=127
+    //% line.min=0 line.max=7
+    //% weight=6
+    //% group="Text"
+    export function setXY(x: number, line: number) {
+        charX = x;
+        charY = line;
     }
     //% block="show number $n at $line"
     //% line.min=0 line.max=7
@@ -415,6 +426,31 @@ namespace OLED {
 
     }
 
+    //% block="draw16x16"
+    //% imageLiteral=1
+    //% imageLiteralColumns=16
+    //% imageLiteralRows=16
+    //% shim=images::createImage
+    export function draw16x16(i: String): void {
+        const im = <Image><any>i;
+
+        for (let dx = 0; dx < 16; dx++) {
+            for (let dy = 0; dy < 16; dy++) {
+            let x = charX+dx;
+            let y = charY*8+dy;
+
+            let page = y >> 3
+            let ind = x + page * 128 + 1
+            let shift_page = y % 8
+            let screenPixel = (screenBuf[ind] | (1 << shift_page))
+            if (!im.pixel(dx, dy)) {
+                screenPixel = (screenPixel ^ (1 << shift_page))
+           
+            screenBuf[ind] = screenPixel
+        }
+        drawBuff(charX,charX+15,charY,charY+1)
+    }
+
     /**
      * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
      * @param lineDirection is the selection of either horizontal line or vertical line
@@ -629,6 +665,8 @@ namespace OLED {
         screenSize = displayWidth * displayHeight
         charX = xOffset
         charY = yOffset
+        firebutton = hex`00F008F45202D202C24282C2C28408F0000F122548484948494848494924120F`
+        smoke = hex`0000E0100808083444048478000000000000010202021A24404021221C000000`
         cross = hex`0C1E3F7FFEFCF8F0E0C080000000000000000000000000000000000000000000000000000080C0E0F0F8FCFE7F3F1E0C00000000000103070F1F3F7FFEFCF8F0E0C0800000000000000000000080C0E0F0F8FCFE7F3F1F0F0703010000000000000000000000000000000000000103070F1F3F7FFEFCF8F0F0F8FCFE7F3F1F0F070301000000000000000000000000000000000000000000000000000080C0E0F0F8FCFE7F3F1F0F0F1F3F7FFEFCF8F0E0C08000000000000000000000000000000000000080C0E0F0F8FCFE7F3F1F0F070301000000000000000000000103070F1F3F7FFEFCF8F0E0C08000000000003078FCFE7F3F1F0F07030100000000000000000000000000000000000000000000000000000103070F1F3F7FFEFC7830`
         font = hex`
     0000000000
