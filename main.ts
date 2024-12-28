@@ -426,31 +426,6 @@ namespace OLED {
 
     }
 
-    //% block="draw16x16"
-    //% imageLiteral=1
-    //% imageLiteralColumns=16
-    //% imageLiteralRows=16
-    //% shim=images::createImage
-    export function draw16x16(i: String): void {
-        const im = <Image><any>i;
-
-        for (let dx = 0; dx < 16; dx++) {
-            for (let dy = 0; dy < 16; dy++) {
-                let x = charX+dx;
-                let y = charY*8+dy;
-
-                let page = y >> 3
-                let ind = x + page * 128 + 1
-                let shift_page = y % 8
-                let screenPixel = (screenBuf[ind] | (1 << shift_page))
-                if (!im.pixel(dx, dy)) {
-                    screenPixel = (screenPixel ^ (1 << shift_page))
-            
-                screenBuf[ind] = screenPixel
-                }
-        }
-        drawBuff(charX,charX+15,charY,charY+1)
-    }
 
     /**
      * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
