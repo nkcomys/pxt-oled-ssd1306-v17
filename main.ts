@@ -29,8 +29,6 @@ namespace OLED {
 
     let font: Buffer;
     let cross: Buffer;
-    let smoke: Buffer;
-    let firebutton: Buffer;
 
 
     const SSD1306_SETCONTRAST = 0x81
@@ -199,15 +197,6 @@ namespace OLED {
             else
                 charX += 12
         }
-    }
-    //% block="setXY $x at $line"
-    //% x.min=0 x.max=127
-    //% line.min=0 line.max=7
-    //% weight=6
-    //% group="Text"
-    export function setXY(x: number, line: number) {
-        charX = x;
-        charY = line;
     }
     //% block="show number $n at $line"
     //% line.min=0 line.max=7
@@ -426,6 +415,57 @@ namespace OLED {
 
     }
 
+    //% block="draw %im on X $x Y $y"
+    //% x.min=0 x.max=127
+    //% y.min=0 y.max=63
+    //% weight=6
+    //% group="Draw"
+    export function drawImageOnXY(im:Image, x: number, y: number) {
+
+        for (let dx = 0; dx < im.width(); dx++) {
+            for (let dy = 0; dy < im.height(); dy++) {
+                let fx = x+dx;
+                let fy = y+dy;
+
+                let page = fy >> 3
+                let ind = fx + page * 128 + 1
+                let shift_page = fy % 8
+                let screenPixel = screenBuf[ind]
+
+                screenPixel = screenPixel | (1 << shift_page)
+                if ((im.pixel(dx, dy) ? 1 : 0)==0) {
+                    screenPixel = (screenPixel ^ (1 << shift_page))
+                }
+                screenBuf[ind] = screenPixel
+            }
+        }
+        //drawBuff()
+
+    }
+
+    //% block="draw16x16"
+    //% weight=6
+    //% imageLiteral=1
+    //% imageLiteralColumns=16
+    //% imageLiteralRows=16
+    //% shim=images::createImage
+    //% group="Draw"
+    export function draw16x16(i: String): Image {
+        const im = <Image><any>i;
+        return im;
+    }
+
+    //% block="draw8x8"
+    //% weight=6
+    //% imageLiteral=1
+    //% imageLiteralColumns=8
+    //% imageLiteralRows=8
+    //% shim=images::createImage
+    //% group="Draw"
+    export function draw8x8(i: String): Image {
+        const im = <Image><any>i;
+        return im;
+    }
 
     /**
      * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
@@ -641,8 +681,6 @@ namespace OLED {
         screenSize = displayWidth * displayHeight
         charX = xOffset
         charY = yOffset
-        firebutton = hex`00F008F45202D202C24282C2C28408F0000F122548484948494848494924120F`
-        smoke = hex`0000E0100808083444048478000000000000010202021A24404021221C000000`
         cross = hex`0C1E3F7FFEFCF8F0E0C080000000000000000000000000000000000000000000000000000080C0E0F0F8FCFE7F3F1E0C00000000000103070F1F3F7FFEFCF8F0E0C0800000000000000000000080C0E0F0F8FCFE7F3F1F0F0703010000000000000000000000000000000000000103070F1F3F7FFEFCF8F0F0F8FCFE7F3F1F0F070301000000000000000000000000000000000000000000000000000080C0E0F0F8FCFE7F3F1F0F0F1F3F7FFEFCF8F0E0C08000000000000000000000000000000000000080C0E0F0F8FCFE7F3F1F0F070301000000000000000000000103070F1F3F7FFEFCF8F0E0C08000000000003078FCFE7F3F1F0F07030100000000000000000000000000000000000000000000000000000103070F1F3F7FFEFC7830`
         font = hex`
     0000000000
